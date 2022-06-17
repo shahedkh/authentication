@@ -1,15 +1,17 @@
 import { useState, useRef, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import AuthContext from "../../store/auth-context";
 
 import classes from "./AuthForm.module.css";
 
 const AuthForm = () => {
+  let navigate = useNavigate();
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  const authCtx =useContext(AuthContext)
+  const authCtx = useContext(AuthContext);
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -27,7 +29,6 @@ const AuthForm = () => {
     } else {
       url =
         "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAGGk3WtZaSQglmcLfu9r43ay6BoRDBKvA";
-
     }
     fetch(url, {
       method: "POST",
@@ -42,12 +43,21 @@ const AuthForm = () => {
     }).then((res) => {
       setIsLoading(false);
       if (res.ok) {
-        return res.json()
+        return res.json();
       } else {
-        return res.json().then((data) => {
-          let errorMessage;
-          throw new Error(errorMessage)
-        }).then(data =>{authCtx.login(data.idToken)}).catch(err =>{alert(err.message)});
+        return res
+          .json()
+          .then((data) => {
+            let errorMessage;
+            throw new Error(errorMessage);
+          })
+          .then((data) => {
+            authCtx.login(data.idToken);
+            navigate('/')
+          })
+          .catch((err) => {
+            alert(err.message);
+          });
       }
     });
   };
