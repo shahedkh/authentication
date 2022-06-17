@@ -6,7 +6,7 @@ const AuthForm = () => {
   const emailInputRef = useRef();
   const passwordInputRef = useRef();
   const [isLogin, setIsLogin] = useState(true);
-  const [ isLoading , setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
@@ -16,37 +16,40 @@ const AuthForm = () => {
     e.preventDefault();
     const enteredEmail = emailInputRef.current.value;
     const enteredPassword = passwordInputRef.current.value;
-    setIsLoading(true)
+    setIsLoading(true);
+    let url;
     if (isLogin) {
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyAGGk3WtZaSQglmcLfu9r43ay6BoRDBKvA";
     } else {
-      fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAGGk3WtZaSQglmcLfu9r43ay6BoRDBKvA"
-        ,{
-          method :'POST',
-          body : JSON.stringify({
-            email: enteredEmail,
-            password:enteredPassword,
-            returnSecureToken : true
-          }),
-          headers : {
-            'Content-Type': 'application/json'            
-          }
-        }      
-        ).then(res =>{
-          setIsLoading(false)
-          if(res.ok){
+      url =
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyAGGk3WtZaSQglmcLfu9r43ay6BoRDBKvA";
 
-          }else{
-            return res.json().then(data => {
-              let errorMessage
-              if(data && data.error && data.error.message){
-                errorMessage = data.error.message
-              }
-            })
-          }
-        });
-      
     }
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify({
+        email: enteredEmail,
+        password: enteredPassword,
+        returnSecureToken: true,
+      }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }).then((res) => {
+      setIsLoading(false);
+      if (res.ok) {
+        return res.json()
+      } else {
+        return res.json().then((data) => {
+          let errorMessage;
+          // if (data && data.error && data.error.message) {
+          //   errorMessage = data.error.message;
+          // }
+          throw new Error(errorMessage)
+        }).then(data =>{console.log(data)}).catch(err =>{alert(err.message)});
+      }
+    });
   };
   return (
     <section className={classes.auth}>
@@ -66,7 +69,9 @@ const AuthForm = () => {
           />
         </div>
         <div className={classes.actions}>
-          {!isLoading &&<button>{isLogin ? "Login" : "Create Account"}</button>}
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "Create Account"}</button>
+          )}
           {isLoading && <p>Sending request...</p>}
           <button
             type="button"
